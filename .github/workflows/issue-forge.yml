@@ -1,0 +1,41 @@
+name: IssueForge
+on:
+  schedule:
+    - cron: '0 0,12 * * *'
+  workflow_dispatch:
+    inputs:
+      source:
+        description: '実行するソース'
+        required: false
+        type: choice
+        options:
+          - all
+          - crashlytics
+          - analytics
+          - appstore-reviews
+          - appstore-crashes
+          - submission
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'issue-forge/package-lock.json'
+      - name: Install dependencies
+        run: cd issue-forge && npm ci
+      - name: Run IssueForge
+        run: cd issue-forge && npm run start
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE_FILTER: ${{ inputs.source || 'all' }}
