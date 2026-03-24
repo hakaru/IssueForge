@@ -22,13 +22,13 @@ export interface AppStoreReview {
   };
 }
 
-export function formatReviewIssue(review: AppStoreReview, appVersion: string): IssueCandidate {
+export function formatReviewIssue(review: AppStoreReview, appVersion: string, labelsPrefix: string = "issue-forge"): IssueCandidate {
   const { rating, createdDate } = review.attributes;
   const title = sanitizeForMarkdown(review.attributes.title);
   const body = sanitizeForMarkdown(review.attributes.body);
   const reviewerNickname = sanitizeForMarkdown(review.attributes.reviewerNickname);
 
-  const labels = ["issue-forge", "issue-forge:review", `star:${rating}`];
+  const labels = [labelsPrefix, `${labelsPrefix}:review`, `star:${rating}`];
   if (rating <= 2) {
     labels.push("priority:critical");
   } else {
@@ -74,6 +74,8 @@ export class AppStoreReviewsSource implements Source {
     private readonly keyId: string,
     private readonly privateKey: string,
     private readonly appVersion: string = "",
+    private readonly intervalHours: number = 24,
+    private readonly labelsPrefix: string = "issue-forge",
   ) {}
 
   async fetch(): Promise<IssueCandidate[]> {
@@ -91,6 +93,9 @@ export class AppStoreReviewsSource implements Source {
     }
 
     const data = (await response.json()) as { data: AppStoreReview[] };
-    return data.data.map((review) => formatReviewIssue(review, this.appVersion));
+    const cutoff = Date.now() - this.intervalHours * 60 * 60 * 1000;
+    return data.data
+      .filter((review) => new Date(review.attributes.createdDate).getTime() >= cutoff)
+      .map((review) => formatReviewIssue(review, this.appVersion, this.labelsPrefix));
   }
 }

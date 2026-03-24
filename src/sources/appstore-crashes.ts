@@ -18,11 +18,11 @@ export interface DiagnosticSignature {
   };
 }
 
-export function formatCrashIssue(sig: DiagnosticSignature): IssueCandidate {
+export function formatCrashIssue(sig: DiagnosticSignature, labelsPrefix: string = "issue-forge"): IssueCandidate {
   const { diagnosticType, weight } = sig.attributes;
   const signature = sanitizeForMarkdown(sig.attributes.signature);
 
-  const labels = ["issue-forge", "issue-forge:appstore-crash"];
+  const labels = [labelsPrefix, `${labelsPrefix}:appstore-crash`];
   if (weight >= 50) {
     labels.push("priority:critical");
   } else {
@@ -56,6 +56,7 @@ export class AppStoreCrashesSource implements Source {
     private readonly issuerId: string,
     private readonly keyId: string,
     private readonly privateKey: string,
+    private readonly labelsPrefix: string = "issue-forge",
   ) {}
 
   async fetch(): Promise<IssueCandidate[]> {
@@ -78,6 +79,6 @@ export class AppStoreCrashesSource implements Source {
     }
 
     const data = (await response.json()) as { data: DiagnosticSignature[] };
-    return data.data.map(formatCrashIssue);
+    return data.data.map((sig) => formatCrashIssue(sig, this.labelsPrefix));
   }
 }

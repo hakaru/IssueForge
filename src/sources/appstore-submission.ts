@@ -21,14 +21,14 @@ export function isRelevantStatusChange(state: string): boolean {
   return RELEVANT_STATES.has(state);
 }
 
-export function formatSubmissionIssue(version: AppStoreVersion): IssueCandidate {
+export function formatSubmissionIssue(version: AppStoreVersion, labelsPrefix: string = "issue-forge"): IssueCandidate {
   const { versionString, appStoreState, createdDate } = version.attributes;
 
   const isRejected = appStoreState === "REJECTED" || appStoreState === "DEVELOPER_REJECTED";
   const isApproved = appStoreState === "READY_FOR_DISTRIBUTION";
 
   const statusLabel = isRejected ? "status:rejected" : isApproved ? "status:approved" : `status:${appStoreState.toLowerCase()}`;
-  const labels = ["issue-forge", "issue-forge:submission", statusLabel];
+  const labels = [labelsPrefix, `${labelsPrefix}:submission`, statusLabel];
 
   if (isRejected) {
     labels.push("priority:critical");
@@ -80,6 +80,7 @@ export class AppStoreSubmissionSource implements Source {
     private readonly issuerId: string,
     private readonly keyId: string,
     private readonly privateKey: string,
+    private readonly labelsPrefix: string = "issue-forge",
   ) {}
 
   async fetch(): Promise<IssueCandidate[]> {
@@ -99,6 +100,6 @@ export class AppStoreSubmissionSource implements Source {
     const data = (await response.json()) as { data: AppStoreVersion[] };
     return data.data
       .filter((v) => isRelevantStatusChange(v.attributes.appStoreState))
-      .map(formatSubmissionIssue);
+      .map((v) => formatSubmissionIssue(v, this.labelsPrefix));
   }
 }

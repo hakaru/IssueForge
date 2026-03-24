@@ -4,7 +4,7 @@ import { formatSubmissionIssue, isRelevantStatusChange } from "../../src/sources
 describe("formatSubmissionIssue", () => {
   it("formats a rejected version into IssueCandidate", () => {
     const version = { id: "ver-123", attributes: { versionString: "2.1.0", appStoreState: "REJECTED", createdDate: "2026-03-23T08:00:00Z" } };
-    const result = formatSubmissionIssue(version);
+    const result = formatSubmissionIssue(version, "issue-forge");
     expect(result.sourceType).toBe("submission");
     expect(result.title).toBe("[Submission] v2.1.0 Rejected");
     expect(result.labels).toContain("status:rejected");
@@ -14,7 +14,7 @@ describe("formatSubmissionIssue", () => {
 
   it("formats an approved version into IssueCandidate", () => {
     const version = { id: "ver-456", attributes: { versionString: "2.1.0", appStoreState: "READY_FOR_DISTRIBUTION", createdDate: "2026-03-23T08:00:00Z" } };
-    const result = formatSubmissionIssue(version);
+    const result = formatSubmissionIssue(version, "issue-forge");
     expect(result.title).toBe("[Submission] v2.1.0 Approved");
     expect(result.labels).toContain("status:approved");
     expect(result.labels).not.toContain("priority:critical");
