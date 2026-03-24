@@ -1,0 +1,48 @@
+name: 'IssueForge'
+description: 'Automatically create GitHub Issues from App Store Connect feedback'
+author: 'hakaru'
+branding:
+  icon: 'alert-circle'
+  color: 'blue'
+
+inputs:
+  app-store-app-id:
+    description: 'App Store Connect Apple ID (numeric)'
+    required: true
+  asc-issuer-id:
+    description: 'App Store Connect API Issuer ID'
+    required: true
+  asc-key-id:
+    description: 'App Store Connect API Key ID'
+    required: true
+  asc-private-key:
+    description: 'App Store Connect API Private Key (.p8 content)'
+    required: true
+  sources:
+    description: 'Comma-separated list of sources to enable (reviews,crashes,submission)'
+    required: false
+    default: 'reviews,crashes,submission'
+  github-token:
+    description: 'GitHub token for creating issues'
+    required: false
+    default: ${{ github.token }}
+  interval-hours:
+    description: 'Time window in hours to fetch data for'
+    required: false
+    default: '12'
+  labels-prefix:
+    description: 'Prefix for auto-created labels'
+    required: false
+    default: 'issue-forge'
+
+outputs:
+  issues-created:
+    description: 'Number of issues created'
+  issues-updated:
+    description: 'Number of issues updated'
+  issues-skipped:
+    description: 'Number of issues skipped'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
