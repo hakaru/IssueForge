@@ -25,10 +25,10 @@ describe("processCandidate", () => {
   it("creates new issue for merge strategy when no existing issue", async () => {
     const octokit = createMockOctokit([]);
     const candidate: IssueCandidate = {
-      sourceType: "crashlytics",
-      title: "[Crashlytics] EXC_BAD_ACCESS",
+      sourceType: "appstore-crash",
+      title: "[AppStore Crash] EXC_BAD_ACCESS",
       body: "Stack trace...",
-      labels: ["issue-forge", "issue-forge:crashlytics"],
+      labels: ["issue-forge", "issue-forge:appstore-crash"],
       dedup: { strategy: "merge", key: "crash-123" },
     };
     const result = await processCandidate(octokit as any, owner, repo, candidate);
@@ -38,13 +38,13 @@ describe("processCandidate", () => {
 
   it("adds comment for merge strategy when existing issue found", async () => {
     const octokit = createMockOctokit([
-      { number: 42, body: "<!-- issue-forge:crashlytics:crash-123 -->" },
+      { number: 42, body: "<!-- issue-forge:appstore-crash:crash-123 -->" },
     ]);
     const candidate: IssueCandidate = {
-      sourceType: "crashlytics",
-      title: "[Crashlytics] EXC_BAD_ACCESS",
+      sourceType: "appstore-crash",
+      title: "[AppStore Crash] EXC_BAD_ACCESS",
       body: "Updated stack trace...",
-      labels: ["issue-forge", "issue-forge:crashlytics"],
+      labels: ["issue-forge", "issue-forge:appstore-crash"],
       dedup: { strategy: "merge", key: "crash-123" },
     };
     const result = await processCandidate(octokit as any, owner, repo, candidate);
@@ -71,10 +71,10 @@ describe("processCandidate", () => {
   it("always creates for always-new strategy without searching", async () => {
     const octokit = createMockOctokit([]);
     const candidate: IssueCandidate = {
-      sourceType: "analytics",
-      title: "[Analytics] DAU急落",
-      body: "DAU dropped 45%",
-      labels: ["issue-forge", "issue-forge:analytics"],
+      sourceType: "submission",
+      title: "[Submission] App rejected",
+      body: "Rejection reason details",
+      labels: ["issue-forge", "issue-forge:submission"],
       dedup: { strategy: "always-new" },
     };
     const result = await processCandidate(octokit as any, owner, repo, candidate);

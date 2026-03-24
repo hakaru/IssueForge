@@ -4,19 +4,19 @@ import { findExistingIssue, buildDedupMarker, extractDedupKey } from "../src/git
 
 describe("buildDedupMarker", () => {
   it("creates HTML comment with source and key", () => {
-    const marker = buildDedupMarker("crashlytics", "crash-123");
-    expect(marker).toBe("<!-- issue-forge:crashlytics:crash-123 -->");
+    const marker = buildDedupMarker("appstore-crash", "crash-123");
+    expect(marker).toBe("<!-- issue-forge:appstore-crash:crash-123 -->");
   });
 });
 
 describe("extractDedupKey", () => {
   it("extracts key from body with marker", () => {
-    const body = "Some text\n<!-- issue-forge:crashlytics:crash-123 -->\nMore text";
-    expect(extractDedupKey(body, "crashlytics")).toBe("crash-123");
+    const body = "Some text\n<!-- issue-forge:appstore-crash:crash-123 -->\nMore text";
+    expect(extractDedupKey(body, "appstore-crash")).toBe("crash-123");
   });
 
   it("returns null when no marker found", () => {
-    expect(extractDedupKey("no marker here", "crashlytics")).toBeNull();
+    expect(extractDedupKey("no marker here", "appstore-crash")).toBeNull();
   });
 });
 
@@ -28,13 +28,13 @@ describe("findExistingIssue", () => {
           issuesAndPullRequests: vi.fn().mockResolvedValue({
             data: {
               total_count: 1,
-              items: [{ number: 42, body: "<!-- issue-forge:crashlytics:crash-123 -->" }],
+              items: [{ number: 42, body: "<!-- issue-forge:appstore-crash:crash-123 -->" }],
             },
           }),
         },
       },
     };
-    const result = await findExistingIssue(mockOctokit as any, "hakaru", "1Take", "crashlytics", "crash-123");
+    const result = await findExistingIssue(mockOctokit as any, "hakaru", "1Take", "appstore-crash", "crash-123");
     expect(result).toBe(42);
   });
 
@@ -48,7 +48,7 @@ describe("findExistingIssue", () => {
         },
       },
     };
-    const result = await findExistingIssue(mockOctokit as any, "hakaru", "1Take", "crashlytics", "crash-123");
+    const result = await findExistingIssue(mockOctokit as any, "hakaru", "1Take", "appstore-crash", "crash-123");
     expect(result).toBeNull();
   });
 });
