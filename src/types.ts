@@ -1,4 +1,3 @@
-// Placeholder - will be properly defined in Task 2
 export type SourceType = "review" | "appstore-crash" | "submission";
 export type DedupConfig =
   | { strategy: "merge"; key: string }
@@ -22,4 +21,17 @@ export interface SourceResult {
   issuesUpdated: number;
   issuesSkipped: number;
   error?: string;
+}
+
+export interface ActionInputs {
+  appStoreAppId: string;
+  ascIssuerId: string;
+  ascKeyId: string;
+  ascPrivateKey: string;
+  sources: string[];
+  githubToken: string;
+  intervalHours: number;
+  labelsPrefix: string;
+  owner: string;
+  repo: string;
 }
