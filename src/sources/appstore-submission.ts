@@ -85,7 +85,7 @@ export class AppStoreSubmissionSource implements Source {
 
   async fetch(): Promise<IssueCandidate[]> {
     const token = generateAscToken(this.issuerId, this.keyId, this.privateKey);
-    const url = `https://api.appstoreconnect.apple.com/v1/apps/${this.appId}/appStoreVersions?filter[platform]=IOS&sort=-createdDate&limit=5`;
+    const url = `https://api.appstoreconnect.apple.com/v1/apps/${this.appId}/appStoreVersions?sort=-createdDate&limit=5`;
     const response = await fetch(url, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -94,7 +94,8 @@ export class AppStoreSubmissionSource implements Source {
     });
 
     if (!response.ok) {
-      throw new Error(`App Store Connect API error: ${response.status} ${response.statusText}`);
+      const body = await response.text().catch(() => "");
+      throw new Error(`App Store Connect API error: ${response.status} ${response.statusText}${body ? ` — ${body}` : ""}`);
     }
 
     const data = (await response.json()) as { data: AppStoreVersion[] };

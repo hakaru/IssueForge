@@ -89,7 +89,8 @@ export class AppStoreReviewsSource implements Source {
     });
 
     if (!response.ok) {
-      throw new Error(`App Store Connect API error: ${response.status} ${response.statusText}`);
+      const body = await response.text().catch(() => "");
+      throw new Error(`App Store Connect API error: ${response.status} ${response.statusText}${body ? ` — ${body}` : ""}`);
     }
 
     const data = (await response.json()) as { data: AppStoreReview[] };
