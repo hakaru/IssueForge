@@ -1,4 +1,7 @@
 import * as core from "@actions/core";
+import * as fs from "fs";
+import * as os from "os";
+import * as path from "path";
 import type { Source, IssueCandidate, SourceResult } from "./types.js";
 
 // filterFilter文字列からソース名へのマッピング
@@ -84,7 +87,10 @@ async function main(): Promise<void> {
     project_id: string;
   };
 
-  process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON = firebaseSaJson;
+  // ADC互換: サービスアカウントJSONを一時ファイルに書き出し GOOGLE_APPLICATION_CREDENTIALS を設定
+  const tmpCredFile = path.join(os.tmpdir(), `firebase-sa-${process.pid}.json`);
+  fs.writeFileSync(tmpCredFile, firebaseSaJson, { mode: 0o600 });
+  process.env.GOOGLE_APPLICATION_CREDENTIALS = tmpCredFile;
 
   const { Octokit } = await import("@octokit/rest");
   const octokit = new Octokit({ auth: token });
@@ -107,7 +113,7 @@ async function main(): Promise<void> {
   const ascToken = generateAscToken(ascIssuerId, ascKeyId, ascPrivateKey);
 
   const sources: Source[] = [
-    new CrashlyticsSource(firebaseSa.project_id, config.app.bigqueryDataset),
+    new CrashlyticsSource(firebaseSa.project_id, config.app.bigqueryDataset, config.app.crashlyticsTable),
     new AnalyticsSource(config.app.ga4PropertyId, config.analytics.thresholds),
     new AppStoreReviewsSource(config.app.appStoreAppId, ascToken, ""),
     new AppStoreCrashesSource(config.app.appStoreAppId, ascToken),

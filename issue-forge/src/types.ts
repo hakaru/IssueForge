@@ -29,6 +29,8 @@ export interface AppConfig {
   firebaseProjectId: string;
   ga4PropertyId: string;
   bigqueryDataset: string;
+  /** BigQueryのCrashlyticsテーブル名。通常は `<bundle_id>_IOS` 等の形式。 */
+  crashlyticsTable: string;
   appStoreAppId: string;
 }
 

@@ -86,6 +86,7 @@ export class AnalyticsSource implements Source {
     const { BetaAnalyticsDataClient } = await import("@google-analytics/data");
     const client = new BetaAnalyticsDataClient();
 
+    // activeUsers, crashAffectedUsers, eventCount を取得してメトリクスを計算する
     const [response] = await client.runReport({
       property: `properties/${this.propertyId}`,
       dateRanges: [
@@ -94,11 +95,14 @@ export class AnalyticsSource implements Source {
       ],
       metrics: [
         { name: "activeUsers" },
+        { name: "crashAffectedUsers" },
+        { name: "crashFreeUsersRate" },
+      ],
+      dimensions: [
+        { name: "dateRange" },
       ],
     });
 
-    // GA4 APIのレスポンスを解析してDailyMetricsに変換
-    // 実装は本番環境の実際のデータ構造に合わせて調整が必要
     const yesterday: DailyMetrics = { dau: 0, errorRate: 0, crashFreeUsers: 100 };
     const today: DailyMetrics = { dau: 0, errorRate: 0, crashFreeUsers: 100 };
 
@@ -106,10 +110,20 @@ export class AnalyticsSource implements Source {
       for (const row of response.rows) {
         const dateRange = row.dimensionValues?.[0]?.value;
         const dau = Number(row.metricValues?.[0]?.value ?? 0);
+        const crashAffectedUsers = Number(row.metricValues?.[1]?.value ?? 0);
+        // crashFreeUsersRate は 0〜1 の小数で返るため %に変換
+        const crashFreeRate = Number(row.metricValues?.[2]?.value ?? 1) * 100;
+        // errorRate: クラッシュ影響ユーザー数 / アクティブユーザー数 * 100
+        const errorRate = dau > 0 ? (crashAffectedUsers / dau) * 100 : 0;
+
         if (dateRange === "date_range_0") {
           yesterday.dau = dau;
+          yesterday.errorRate = Number(errorRate.toFixed(2));
+          yesterday.crashFreeUsers = Number(crashFreeRate.toFixed(2));
         } else if (dateRange === "date_range_1") {
           today.dau = dau;
+          today.errorRate = Number(errorRate.toFixed(2));
+          today.crashFreeUsers = Number(crashFreeRate.toFixed(2));
         }
       }
     }

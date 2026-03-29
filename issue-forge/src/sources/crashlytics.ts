@@ -52,6 +52,8 @@ export class CrashlyticsSource implements Source {
   constructor(
     private readonly projectId: string,
     private readonly dataset: string,
+    /** BigQueryテーブル名。Crashlyticsエクスポートは通常 `<bundle_id>_IOS` 形式。 */
+    private readonly crashlyticsTable: string,
   ) {}
 
   async fetch(): Promise<IssueCandidate[]> {
@@ -69,7 +71,7 @@ export class CrashlyticsSource implements Source {
         ANY_VALUE(stacktrace) AS sample_stack_trace,
         ANY_VALUE(os_display_version) AS os_version,
         ANY_VALUE(device_model) AS device_model
-      FROM \`${this.projectId}.${this.dataset}.firebase_crashlytics\`
+      FROM \`${this.projectId}.${this.dataset}.${this.crashlyticsTable}\`
       WHERE DATE(event_timestamp) = CURRENT_DATE()
       GROUP BY issue_id, issue_title
       ORDER BY user_count DESC

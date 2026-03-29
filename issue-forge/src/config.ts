@@ -8,6 +8,8 @@ export const config: Config = {
     firebaseProjectId: "",
     ga4PropertyId: "",
     bigqueryDataset: "",
+    // Crashlyticsエクスポートのテーブル名: <bundle_id>_IOS 形式（ドットをアンダースコアに変換）
+    crashlyticsTable: "com_hakaru_1Take_IOS",
     appStoreAppId: "",
   },
   schedule: {
